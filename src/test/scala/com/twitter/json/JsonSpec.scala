@@ -33,7 +33,7 @@ object JsonSpec extends Specification {
 
       "string containing unicode outside of the BMP (using UTF-16 surrogate pairs)" in {
         // NOTE: The json.org spec is unclear on how to handle supplementary characters.
-        val str = "~>󾀾<~"
+        val str = "~><~"
         Json.quote(str) mustEqual "\"~>\\udbb8\\udc3e<~\""
       }
 
@@ -294,6 +294,45 @@ object JsonSpec extends Specification {
 
       "list with map containing map" in {
         Json.build(List(Map("1" -> Map("2" -> "3")))).toString mustEqual
+          "[{\"1\":{\"2\":\"3\"}}]"
+      }
+    }
+
+    "build arrays" in {
+      "empty empty array" in {
+        Json.build(Array(Array())).toString mustEqual "[[]]"
+      }
+
+      "list with empty Map" in {
+        Json.build(Array(Map())).toString mustEqual "[{}]"
+      }
+
+      "simple list" in {
+        Json.build(Array("id", 1)).toString mustEqual "[\"id\",1]"
+      }
+
+      "nested list" in {
+        Json.build(Array("more arrays!", Array(1, 2, "three"))).toString mustEqual
+          "[\"more arrays!\",[1,2,\"three\"]]"
+      }
+
+      "array with map" in {
+        Json.build(Array("maptastic!", Map(1 -> 2))).toString mustEqual
+          "[\"maptastic!\",{\"1\":2}]"
+      }
+
+      "array with two maps" in {
+        Json.build(Array(Map(1 -> 2), Map(3 -> 4))).toString mustEqual
+          "[{\"1\":2},{\"3\":4}]"
+      }
+
+      "array with map containing array" in {
+        Json.build(Array(Map(1 -> Array(2, 3)))).toString mustEqual
+         "[{\"1\":[2,3]}]"
+      }
+
+      "array with map containing map" in {
+        Json.build(Array(Map("1" -> Map("2" -> "3")))).toString mustEqual
           "[{\"1\":{\"2\":\"3\"}}]"
       }
     }
